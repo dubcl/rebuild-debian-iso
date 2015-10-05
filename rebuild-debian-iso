@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
-shopt -s globstar
-
 input_iso=$1
 output_iso=$2
 preseed=$3
 input_file_dir=$4
+
+if [ ! -f /usr/bin/bsdtar ] || [ ! -f /bin/mktemp ] || [ ! -f /bin/gzip ]  || [ ! -f /bin/sed ] || [ ! -f /usr/bin/find ] || [ ! -f /usr/bin/genisoimage ]; then
+	printf  '%s\n' \
+		"Some program is not available, please check if you have installed the follow programs:" \
+		"bsdtar" \
+		"mktemp" \
+		"gzip" \
+		"sed" \
+		"find" \
+		"genisoimage"
+else
 
 msg() {
     printf '>>> %s\n' "$@"
@@ -59,7 +68,7 @@ msg "Generating md5sums"
 ( cd "$iso_dir" && find . -type f -exec md5sum {} + > md5sum.txt )
 
 msg "Generating output ISO image"
-mkisofs -quiet \
+genisoimage -quiet \
     -o "$output_iso" \
     -r -J -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b isolinux/isolinux.bin -c isolinux/boot.cat \
@@ -69,3 +78,5 @@ msg "Removing temporary directories"
 rm -rf "$iso_dir" "$initrd_dir"
 
 msg "Output ISO generated: $output_iso"
+
+fi
